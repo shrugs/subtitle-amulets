@@ -1,10 +1,11 @@
 import { createReadStream, readdirSync } from 'fs';
+import { join } from 'path';
 import { parse, map, filter, NodeCue, formatTimestamp } from 'subtitle';
 import { toValidAmulet } from './amulet';
 
 async function main() {
-  for (const file of readdirSync('./subs')) {
-    const stream = createReadStream(`./subs/${file}`)
+  for (const filename of readdirSync('./subs')) {
+    const stream = createReadStream(join('./subs', filename))
       .pipe(parse())
       .pipe(filter((node) => node.type === 'cue'))
       .pipe(filter((node) => !!toValidAmulet((node as NodeCue).data.text)))
@@ -14,7 +15,7 @@ async function main() {
           const end = formatTimestamp((node as NodeCue).data.end, { format: 'WebVTT' });
           return {
             amulet: (node as NodeCue).data.text,
-            title: `${file} // ${start}—${end}`,
+            title: `${filename} // ${start}—${end}`,
           };
         }),
       );
